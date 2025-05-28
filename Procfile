@@ -1,0 +1,1 @@
+web: gunicorn household_project.wsgi

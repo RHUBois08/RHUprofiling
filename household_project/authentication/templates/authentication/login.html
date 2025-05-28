@@ -1,0 +1,43 @@
+{% load static tailwind_tags %}
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Household Profiling Login</title>
+    <link rel="icon" type="image/png" href="{% static 'images/RHU_logo.png' %}">
+    {% tailwind_css %}
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet"/>
+<body class="flex h-screen bg-gray-100">
+    <div class="w-1/2 bg-white flex justify-center items-center">
+        <img src={% static "images/RHU_logo.png" %} alt="Municipal Health Office Logo" class="w-64">
+    </div>
+    <div class="w-1/2 bg-teal-800 flex flex-col justify-center items-center text-white p-10">
+        <h1 class="text-3xl font-semibold mb-6">Household Profiling</h1>
+        <div class="w-full max-w-md">
+            <h2 class="text-xl mb-4">LOGIN</h2>
+            <form method="POST" class="space-y-4">
+                {% csrf_token %}
+                <div class="relative">
+                    <i class="fas fa-envelope absolute left-3 top-3 text-gray-400"></i>
+                    <input class="w-full pl-10 pr-4 py-2 text-gray-700 bg-white border rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500" placeholder="Input your email" type="email" name="email"/>
+                </div>
+                <div class="relative">
+                    <i class="fas fa-lock absolute left-3 top-3 text-gray-400"></i>
+                    <input class="w-full pl-10 pr-4 py-2 text-gray-700 bg-white border rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500" placeholder="Input password" type="password" name="password"/>
+                </div>
+                <button type="submit" class="w-full bg-teal-600 hover:bg-teal-700 text-white p-3 rounded-md">Login</button>
+            </form>
+            {% if error %}
+            <div class="bg-red-500 text-white p-4 rounded-md relative mt-4">
+                <span>{{ error }}</span>
+                <button type="button" class="absolute top-0 right-0 mt-2 mr-2 text-white" onclick="this.parentElement.style.display='none';">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>

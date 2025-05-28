@@ -1,0 +1,52 @@
+{% load static tailwind_tags auth_filters %}
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Household Profiling</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet"/>
+    <link rel="icon" type="image/png" href="{% static 'images/RHU_logo.png' %}"> <!-- Correct favicon link -->
+    {% tailwind_css %}
+    <style>
+        .content::-webkit-scrollbar {
+            width: 0;
+            height: 0;
+        }
+        .content {
+            -ms-overflow-style: none;  /* IE and Edge */
+            scrollbar-width: none;  /* Firefox */
+        }
+    </style>
+</head>
+<body class="flex min-h-screen font-sans">
+
+<div class="sidebar text-center bg-teal-700 text-white flex flex-col justify-between w-1/6 p-4 fixed h-full">
+    <a href="https://www.facebook.com/rizal.rhu" target="_blank">
+        <img src="{% static 'images/RHU_logo.png' %}" alt="Logo" class="w-28 mx-auto mb-4">
+    </a>
+    <h2 class="text-center text-xl font-semibold mb-4">Household Profiling</h2>
+
+    <!-- Separated Sidebar Links -->
+    <a href="{% url 'dashboard:index' %}" class="block py-2 px-4 hover:bg-teal-600 transition {% if request.resolver_match.url_name == 'index' and request.resolver_match.app_name == 'dashboard' %}bg-teal-600{% endif %}">Dashboard</a>
+    <a href="{% url 'records:index' %}" class="block py-2 px-4 hover:bg-teal-600 transition {% if request.resolver_match.url_name|in_list:'index,profiling' and request.resolver_match.app_name == 'records' %}bg-teal-600{% endif %}">Records</a>
+    <a href="{% url 'reports:index' %}" class="block py-2 px-4 hover:bg-teal-600 transition {% if request.resolver_match.url_name == 'index' and request.resolver_match.app_name == 'reports' %}bg-teal-600{% endif %}">Reports</a>
+    
+    <a href="{% url 'logout' %}" class="block py-2 px-4 mt-auto hover:bg-teal-600 transition">Logout</a>
+</div>
+
+<div class="flex flex-col w-5/6 ml-auto">
+    <div class="top-nav w-full bg-gray-300 p-4 sticky top-0 right-0 z-10 ">
+        {% block top-nav %}{% endblock %}
+    </div>
+
+    <div class="tabs">
+        {% block tabs %}{% endblock %}
+    </div>
+
+    <div class="content w-full p-4 overflow-y-auto">
+        {% block content %}{% endblock %}
+    </div>
+</div>
+
+</body>
+</html>

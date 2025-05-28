@@ -1,0 +1,298 @@
+{% extends 'authentication/base.html' %}
+{% load report_filters %}
+{% block top-nav %}
+    <div class="flex justify-between items-center">
+        <h1 class="font-semibold text-2xl">Reports</h1>
+        <div class="flex flex-row items-center gap-4">
+            <select id="year-selector" name="year" onchange="filterByYear(this.value)" class="rounded-lg border-none">
+                {% for year in year_range %}
+                <option value="{{ year }}" {% if year == selected_year %}selected{% endif %}>{{ year }}</option>
+                {% endfor %}
+            </select>
+        </div>
+    </div>
+{% endblock %}
+{% block content %}
+<body class="p-4 bg-gray-100">
+    <div class="flex justify-start mb-4 gap-4">
+        <form method="get" id="barangay-filter-form">
+            <input type="hidden" name="year" value="{{ selected_year }}"> <!-- Preserve the selected year -->
+            <select id="barangay" name="barangay" class="text-black py-2 px-6 rounded-md white:bg-teal-600 mr-6" onchange="document.getElementById('barangay-filter-form').submit()">
+                <option value="">Barangay All</option>
+                <option value="antipolo" {% if selected_barangay == "antipolo" %}selected{% endif %}>Antipolo</option>
+                <option value="entablado" {% if selected_barangay == "entablado" %}selected{% endif %}>Entablado</option>
+                <option value="laguan" {% if selected_barangay == "laguan" %}selected{% endif %}>Laguan</option>
+                <option value="pauli-1" {% if selected_barangay == "pauli_1" %}selected{% endif %}>Pauli-1</option>
+                <option value="pauli-2" {% if selected_barangay == "pauli_2" %}selected{% endif %}>Pauli-2</option>
+                <option value="poblacion east" {% if selected_barangay == "east poblacion" %}selected{% endif %}>Poblacion East</option>
+                <option value="poblacion west" {% if selected_barangay == "west poblacion" %}selected{% endif %}>Poblacion West</option>
+                <option value="pook" {% if selected_barangay == "pook" %}selected{% endif %}>Pook</option>
+                <option value="tala" {% if selected_barangay == "tala" %}selected{% endif %}>Tala</option>
+                <option value="talaga" {% if selected_barangay == "talaga" %}selected{% endif %}>Talaga</option>
+                <option value="tuy" {% if selected_barangay == "tuy" %}selected{% endif %}>Tuy</option>
+            </select>
+        </form>
+    </div>
+
+    <div class="max-w-6xl mx-auto bg-white p-6 shadow-lg rounded-lg">
+        <!-- Filter Buttons -->
+        <div class="mb-4 flex flex-row gap-4">
+            <div class="flex flex-row mb-4">
+                <label class="household-label-field">Houses: 
+                    <input type="text" value="{{ total_households }}" class="input-field ml-2 w-32 border-0 border-b-2 border-gray-500 focus:ring-0 outline-none bg-transparent text-center" readonly>
+                </label>
+            </div>
+            <div class="flex flex-row mb-4 ml-6">
+                <label class="families-label-field">Households: 
+                    <input type="text" value="{{ total_families }}" class="input-field ml-2 w-32 border-0 border-b-2 border-gray-500 focus:ring-0 outline-none bg-transparent text-center" readonly>
+                </label>
+            </div>
+            
+        </div>
+        <h3 class="font-bold">Klasipikasyon ng Edad</h3>       
+        <table class="w-full border-collapse border border-gray-300 mb-4">
+            <thead>
+                <tr class="bg-gray-200">
+                    <th class="border p-2">Edad</th>
+                    <th class="border p-2">Klasipikasyon</th>
+                    <th class="border p-2">Lalaki</th>
+                    <th class="border p-2">Babae</th>
+                    <th class="border p-2">Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class="border p-2">0 to less than 1 year</td>
+                    <td class="border p-2">Infants</td>
+                    <td class="border p-2 text-center">{{ age_classifications.Infants_Male }}</td>
+                    <td class="border p-2 text-center">{{ age_classifications.Infants_Female }}</td>
+                    <td class="border p-2 text-center">{{ age_classifications.Infants_Male|add:age_classifications.Infants_Female }}</td>
+                </tr>
+                <tr>
+                    <td class="border p-2">1 to less than 5 years</td>
+                    <td class="border p-2">Toddler</td>
+                    <td class="border p-2 text-center">{{ age_classifications.Toddler_Male }}</td>
+                    <td class="border p-2 text-center">{{ age_classifications.Toddler_Female }}</td>
+                    <td class="border p-2 text-center">{{ age_classifications.Toddler_Male|add:age_classifications.Toddler_Female }}</td>
+                </tr>
+                <tr>
+                    <td class="border p-2">5-12 years</td>
+                    <td class="border p-2">Childhood</td>
+                    <td class="border p-2 text-center">{{ age_classifications.Childhood_Male }}</td>
+                    <td class="border p-2 text-center">{{ age_classifications.Childhood_Female }}</td>
+                    <td class="border p-2 text-center">{{ age_classifications.Childhood_Male|add:age_classifications.Childhood_Female }}</td>
+                </tr>
+                <tr>
+                    <td class="border p-2">13-19 years</td>
+                    <td class="border p-2">Teenage</td>
+                    <td class="border p-2 text-center">{{ age_classifications.Teenage_Male }}</td>
+                    <td class="border p-2 text-center">{{ age_classifications.Teenage_Female }}</td>
+                    <td class="border p-2 text-center">{{ age_classifications.Teenage_Male|add:age_classifications.Teenage_Female }}</td>
+                </tr>
+                <tr>
+                    <td class="border p-2">20-39 years</td>
+                    <td class="border p-2">Adults</td>
+                    <td class="border p-2 text-center">{{ age_classifications.Adults_Male }}</td>
+                    <td class="border p-2 text-center">{{ age_classifications.Adults_Female }}</td>
+                    <td class="border p-2 text-center">{{ age_classifications.Adults_Male|add:age_classifications.Adults_Female }}</td>
+                </tr>
+                <tr>
+                    <td class="border p-2">40-59 years</td>
+                    <td class="border p-2">Middle Aged Adults</td>
+                    <td class="border p-2 text-center">{{ age_classifications.MiddleAged_Male }}</td>
+                    <td class="border p-2 text-center">{{ age_classifications.MiddleAged_Female }}</td>
+                    <td class="border p-2 text-center">{{ age_classifications.MiddleAged_Male|add:age_classifications.MiddleAged_Female }}</td>
+                </tr>
+                <tr>
+                    <td class="border p-2">60+ years</td>
+                    <td class="border p-2">Seniors</td>
+                    <td class="border p-2 text-center">{{ age_classifications.Seniors_Male }}</td>
+                    <td class="border p-2 text-center">{{ age_classifications.Seniors_Female }}</td>
+                    <td class="border p-2 text-center">{{ age_classifications.Seniors_Male|add:age_classifications.Seniors_Female }}</td>
+                </tr>
+            </tbody>
+        </table>
+                
+        <div class="mb-4">
+            <div class="grid grid-cols-1 mb-4">
+                <label>WRA (14-49 years): 
+                    <input type="text" value="{{ wra_count }}" class="input-field ml-2 w-32 border-0 border-b-2 border-gray-500 focus:ring-0 outline-none bg-transparent text-center" readonly>
+                </label>
+            </div>
+            <div class="grid grid-cols-1 mb-4">
+                <label>Gumagamit ng Family Planning: 
+                    <input type="text" value="{{ family_planning_count }}" class="input-field ml-2 w-32 border-0 border-b-2 border-gray-500 focus:ring-0 outline-none bg-transparent text-center" readonly>
+                </label>
+            </div>
+            <div class="grid grid-cols-1 mb-4">
+                <label>Buntis: 
+                    <input type="text" value="{{ pregnant_count }}" class="input-field ml-2 w-32 border-0 border-b-2 border-gray-500 focus:ring-0 outline-none bg-transparent text-center" readonly>
+                </label>
+            </div>
+        </div>
+                
+        <h3 class="font-bold">Tubig & Palikuran</h3>
+        <table class="w-full border-collapse border border-gray-300 mb-4">
+            <thead>
+                <tr class="bg-gray-200">
+                    <th class="border p-2">TUBIG</th>
+                    <th class="border p-2">     </th>
+                    <th class="border p-2">PALIKURAN</th>
+                    <th class="border p-2">     </th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class="border">
+                    <td class="border p-2">Level 1</td>
+                    <td class="border p-2 text-center">{{ level1_count }}</td>
+                    <td class="border p-2">Share</td>
+                    <td class="border p-2 text-center">{{ shared_toilet_count }}</td>
+                </tr>
+                <tr class="border">
+                    <td class="border p-2">Level 2</td>
+                    <td class="border p-2 text-center">{{ level2_count }}</td>
+                    <td class="border p-2">Owned</td>
+                    <td class="border p-2 text-center">{{ owned_toilet_count }}</td>
+                </tr>
+                <tr class="border">
+                    <td class="border p-2">Level 3</td>
+                    <td class="border p-2 text-center">{{ level3_count }}</td>
+                    <td class="border p-2">None</td>
+                    <td class="border p-2 text-center">{{ none_toilet_count }}</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="grid grid-cols-1 mb-2">
+            <h3 class="flex items-end font-bold">PWD (Kapansanan): 
+                <input type="text" value="{{ pwd_count }}" class="input-field ml-2 w-32 border-0 border-b-2 border-gray-500 focus:ring-0 outline-none bg-transparent text-center" readonly>
+            </h3>
+        </div>
+        <table class="w-full border-collapse border border-gray-300 mb-4">
+            <thead>
+                <tr class="bg-gray-200">
+                    <th class="border p-2">Uri ng Kapansanan</th>
+                    <th class="border p-2">Lalaki</th>
+                    <th class="border p-2">Babae</th>
+                    <th class="border p-2">Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in pwd_table %}
+                <tr>
+                    <td class="border p-2">{{ row.type }}</td>
+                    <td class="border p-2 text-center">{{ row.male_count }}</td>
+                    <td class="border p-2 text-center">{{ row.female_count }}</td>
+                    <td class="border p-2 text-center">{{ row.total_count }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+                
+        <div class="grid grid-cols-1 mb-2">
+            <h3 class="flex items-end font-bold">May Sakit: 
+                <input type="text" value="{{ may_sakit_count }}" class="input-field ml-2 w-32 border-0 border-b-2 border-gray-500 focus:ring-0 outline-none bg-transparent text-center" readonly>
+            </h3>
+        </div>
+        <table class="w-full border-collapse border border-gray-300">
+            <thead>
+                <tr class="bg-gray-200">
+                    <th class="border p-2">Code</th>
+                    <th class="border p-2">Mga Sakit</th>
+                    <th class="border p-2">Lalaki</th>
+                    <th class="border p-2">Babae</th>
+                    <th class="border p-2">Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for sickness in sickness_counts %}
+                {% if sickness.total_count > 0 %}
+                <tr>
+                    <td class="border p-2" title="{{ sickness_code_descriptions|get_item:sickness.code }}">
+                        {{ sickness.code }}
+                    </td>
+                    <td class="border p-2">{{ sickness.disease }}</td>
+                    <td class="border p-2 text-center">{{ sickness.male_count }}</td>
+                    <td class="border p-2 text-center">{{ sickness.female_count }}</td>
+                    <td class="border p-2 text-center">{{ sickness.total_count }}</td>
+                </tr>
+                {% endif %}
+                {% endfor %}
+            </tbody>
+        </table>
+        <table class="w-full border-collapse border border-gray-300 mb-4">
+            <thead>
+                <tr class="bg-gray-200">
+                    <th class="border p-2">Iba pang Sakit</th>
+                    <th class="border p-2">Lalaki</th>
+                    <th class="border p-2">Babae</th>
+                    <th class="border p-2">Total</th>
+                </tr>
+            </thead>
+            <tbdody>
+                {% for condition, counts in other_health_condition.items %}
+                <tr>
+                    <td class="border p-2">{{ condition }}</td>
+                    <td class="border p-2 text-center">{{ counts.male_count }}</td>
+                    <td class="border p-2 text-center">{{ counts.female_count }}</td>
+                    <td class="border p-2 text-center">{{ counts.total_count }}</td>
+                </tr>
+                {% endfor %}
+            </tbdody>
+        </table>
+
+        <div class="mb-4 flex justify-end">
+            <button
+                type="button"
+                onclick="openPrintReport()"
+                class="bg-teal-500 text-white font-semibold hover:bg-teal-600 hover:text-white py-2 px-6 rounded-md shadow-lg flex items-center gap-2"
+            >
+                <i class="fas fa-print"></i>
+                Print
+            </button>
+        </div>
+    </div>
+    <style>
+        .input-field {
+            width: 8rem;
+            border: none;
+            border-bottom: 2px solid #9CA3AF; /* Gray-500 */
+            background-color: transparent;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        .input-field:focus {
+            border-color: #14B8A6; /* Teal-500 */
+        }
+
+        .household-label-field {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .families-label-field {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-left: 12rem;
+        }
+
+    </style>
+    <script>
+        function filterByYear(year) {
+            const url = new URL(window.location.href);
+            url.searchParams.set('year', year); // Add or update the year query parameter
+            window.location.href = url.toString(); // Reload the page with the updated URL
+        }
+        function openPrintReport() {
+            const url = new URL("{% url 'reports:print_report' %}", window.location.origin);
+            const year = document.getElementById('year-selector').value;
+            const barangay = document.getElementById('barangay') ? document.getElementById('barangay').value : '';
+            if (year) url.searchParams.set('year', year);
+            if (barangay) url.searchParams.set('barangay', barangay);
+            window.open(url.toString(), '_blank');
+        }
+    </script>
+</body>
+{% endblock %}

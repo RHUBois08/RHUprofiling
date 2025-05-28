@@ -1,0 +1,323 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Report for Year {{ selected_year }}</title>
+    <link href="{% static 'css/dist/styles.css' %}" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <style>
+        @media print {
+            @page { size: 8.5in 13in; margin: 0.10in; }
+            body { padding: 0.2in 0.2in 0.2in 0.2in !important; }
+            button { display: none; }
+            .page-break { page-break-before: always; }
+        }
+        body {
+            margin: 0;
+            padding-left: 0.2in;
+            padding-right: 0.2in;
+            padding-top: 0;
+            padding-bottom: 0;
+        }
+        .header-flex {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.5rem;
+            margin-top: 0 !important; /* Ensure no top margin */
+        }
+        .header-logo {
+            width: 110px;
+            height: 110px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #f3f3f3;
+            overflow: hidden;
+        }
+        .header-logo img {
+            max-width: 100%;
+            max-height: 100%;
+            width: auto;
+            height: auto;
+            display: block;
+            object-fit: contain;
+        }
+        .header-center {
+            flex: 1;
+            text-align: center;
+        }
+        .header-center h1 {
+            font-size: 1rem;
+            font-weight: bold;
+        }
+        .header-center h2 {
+            font-size: 0.80rem;
+            font-weight: normal;
+        }
+        .header-contact {
+            font-size: 0.80rem;
+        }
+        .header-contact .icon {
+            vertical-align: middle;
+            margin-right: 4px;
+        }
+        .col-gender, .col-total {
+            width: 80px;
+            min-width: 80px;
+            max-width: 80px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body class="bg-white text-gray-900 font-sans" style="padding-top:0 !important;">
+    <header class="header-flex" style="margin-top:0;">
+        <div class="header-logo">
+            <img src="{% static 'images/RIZAL_logo.png' %}" alt="Right Seal">
+        </div>
+        <div class="header-center">
+            <h2>Republic of the Philippines</h2>
+            <h2>Province of Laguna</h2>
+            <h2>Municipality of Rizal</h2>
+            <h1>OFFICE OF THE MUNICIPAL HEALTH OFFICER</h1>
+            <div>A. Bonifacio St., Brgy. Pauli-2 Rizal, Laguna</div>
+            <div class="header-contact">
+                <span>
+                    <span class="icon" style="color:#1877f3;"><i class="fa-solid fa-envelope"></i></span> mho.rizallaguna@gmail.com;
+                </span>
+                <span>
+                    <a href="mailto:rizal_ruralhealth@yahoo.com" style="color:#1a0dab;">rizal_ruralhealth@yahoo.com</a>
+                </span>
+                <span style="margin-left:10px;">
+                    <span class="icon" style="color:#1877f3;"><i class="fa-brands fa-facebook"></i></span>Rizal Mho
+                </span>
+            </div>
+        </div>
+        <div class="header-logo">
+            <img src="{% static 'images/RHU_logo.png' %}" alt="Left Seal">
+        </div>
+    </header>
+    <div class="flex flex-col justify-center items-center border-t-2 border-gray-500">
+        <h1 class="mb-2 text-3xl font-bold text-black mt-5">Profiling Reports</h1>
+        <div class="text-lg mb-6">
+            Year: <strong>{{ selected_year }}</strong>
+            {% if selected_barangay %}
+                | Barangay: <strong>{{ selected_barangay|title }}</strong>
+            {% endif %}
+        </div>
+    </div>
+    <div>
+        <div class="flex flex-row gap-2 mb-6 w-full">
+            <div class="flex items-center w-1/2">
+                <h3 class="font-semibold">Houses:</h3>
+                <span class="ml-4">{{ total_households }}</span>  
+            </div>
+            <div class="flex items-center w-1/2">
+                <h3 class="font-semibold">Households:</h3>
+                <span class="ml-4">{{ total_families }}</span>  
+            </div>
+        </div>
+        <div class="mb-6 w-full">
+            <div class="mb-8">
+                <h3 class="font-bold mb-2">Klasipikasyon ng Edad</h3>
+                <table class="w-full border border-gray-400 mb-4 text-sm">
+                    <thead>
+                        <tr class="bg-gray-100">
+                            <th class="border p-1">Edad</th>
+                            <th class="border p-1">Klasipikasyon</th>
+                            <th class="border p-1">Lalaki</th>
+                            <th class="border p-1">Babae</th>
+                            <th class="border p-1">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <td class="border text-center p-1">0 to less than 1 year</td>
+                        <td class="border text-center p-1">Infants</td>
+                        <td class="border text-center p-1">{{ age_classifications.Infants_Male }}</td>
+                        <td class="border text-center p-1">{{ age_classifications.Infants_Female }}</td>
+                        <td class="border text-center p-1">{{ age_classifications.Infants_Male|add:age_classifications.Infants_Female }}</td>
+                    </tr>
+                    <tr>
+                        <td class="border text-center p-1">1 to less than 5 years</td>
+                        <td class="border text-center p-1">Toddler</td>
+                        <td class="border text-center p-1">{{ age_classifications.Toddler_Male }}</td>
+                        <td class="border text-center p-1">{{ age_classifications.Toddler_Female }}</td>
+                        <td class="border text-center p-1">{{ age_classifications.Toddler_Male|add:age_classifications.Toddler_Female }}</td>
+                    </tr>
+                    <tr>
+                        <td class="border text-center p-1">5-12 years</td>
+                        <td class="border text-center p-1">Childhood</td>
+                        <td class="border text-center p-1">{{ age_classifications.Childhood_Male }}</td>
+                        <td class="border text-center p-1">{{ age_classifications.Childhood_Female }}</td>
+                        <td class="border text-center p-1">{{ age_classifications.Childhood_Male|add:age_classifications.Childhood_Female }}</td>
+                    </tr>
+                    <tr>
+                        <td class="border text-center p-1">13-19 years</td>
+                        <td class="border text-center p-1">Teenage</td>
+                        <td class="border text-center p-1">{{ age_classifications.Teenage_Male }}</td>
+                        <td class="border text-center p-1">{{ age_classifications.Teenage_Female }}</td>
+                        <td class="border text-center p-1">{{ age_classifications.Teenage_Male|add:age_classifications.Teenage_Female }}</td>
+                    </tr>
+                    <tr>
+                        <td class="border text-center p-1">20-39 years</td>
+                        <td class="border text-center p-1">Adults</td>
+                        <td class="border text-center p-1">{{ age_classifications.Adults_Male }}</td>
+                        <td class="border text-center p-1">{{ age_classifications.Adults_Female }}</td>
+                        <td class="border text-center p-1">{{ age_classifications.Adults_Male|add:age_classifications.Adults_Female }}</td>
+                    </tr>
+                    <tr>
+                        <td class="border text-center p-1">40-59 years</td>
+                        <td class="border text-center p-1">Middle Aged Adults</td>
+                        <td class="border text-center p-1">{{ age_classifications.MiddleAged_Male }}</td>
+                        <td class="border text-center p-1">{{ age_classifications.MiddleAged_Female }}</td>
+                        <td class="border text-center p-1">{{ age_classifications.MiddleAged_Male|add:age_classifications.MiddleAged_Female }}</td>
+                    </tr>
+                    <tr>
+                        <td class="border text-center p-1">60+ years</td>
+                        <td class="border text-center p-1">Seniors</td>
+                        <td class="border text-center p-1">{{ age_classifications.Seniors_Male }}</td>
+                        <td class="border text-center p-1">{{ age_classifications.Seniors_Female }}</td>
+                        <td class="border text-center p-1">{{ age_classifications.Seniors_Male|add:age_classifications.Seniors_Female }}</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="mb-6 w-full flex flex-row justify-evenly gap-4">
+            <div class="w-1/2" style="max-width:50%;">
+                <h3 class="font-bold mb-2">Tubig & Palikuran</h3>
+                <table class="mb-4 border border-gray-400 text-sm w-full">
+                    <thead>
+                        <tr class="bg-gray-100">
+                            <th class="border p-1">Tubig</th>
+                            <th class="p-1"></th>
+                            <th class="border p-1">Palikuran</th>
+                            <th class="p-1"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="text-center border p-1">Level 1</td>
+                            <td class="text-center border py-1 px-4">{{ level1_count }}</td>
+                            <td class="text-center border p-1">Share</td>
+                            <td class="text-center border py-1 px-4">{{ shared_toilet_count }}</td>
+                        </tr>
+                        <tr>
+                            <td class="text-center border p-1">Level 2</td>
+                            <td class="text-center border py-1 px-4">{{ level2_count }}</td>
+                            <td class="text-center border p-1">Owned</td>
+                            <td class="text-center border py-1 px-4">{{ owned_toilet_count }}</td>
+                        </tr>
+                        <tr>
+                            <td class="text-center border p-1">Level 3</td>
+                            <td class="text-center border py-1 px-4">{{ level3_count }}</td>
+                            <td class="text-center border p-1">None</td>
+                            <td class="text-center border py-1 px-4">{{ none_toilet_count }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="w-1/2 " style="max-width:50%;">
+                <h3 class="font-bold mb-2">Buod ng Kalusugang Reproduktibo</h3>
+                <table class="mb-4 border border-gray-400 text-sm w-full">
+                    <thead>
+                        <tr class="bg-gray-100">
+                            <th class="border p-1">Kategorya</th>
+                            <th class="border p-1"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="border p-1">WRA (14-49 years)</td>
+                            <td class="border py-1 px-4 text-center">{{ wra_count }}</td>
+                        </tr>
+                        <tr>
+                            <td class="border p-1">Gumagamit ng Family Planning</td>
+                            <td class="border py-1 px-4 text-center">{{ family_planning_count }}</td>
+                        </tr>
+                        <tr>
+                            <td class="border p-1">Buntis</td>
+                            <td class="border py-1 px-4 text-center">{{ pregnant_count }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div>
+            <h3 class="font-semibold">PWD (Kapansanan): <span class="ml-4 font-none">{{ pwd_count }}</span> </h3>     
+        </div>
+        <table class="w-full border border-gray-400 mb-4 text-sm">
+            <thead>
+                <tr class="bg-gray-100">
+                    <th class="border p-1">Uri ng Kapansanan</th>
+                    <th class="border p-1 col-gender">Lalaki</th>
+                    <th class="border p-1 col-gender">Babae</th>
+                    <th class="border p-1 col-total">Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in pwd_table %}
+                <tr>
+                    <td class="text-center border p-1">{{ row.type }}</td>
+                    <td class="text-center border p-1 col-gender">{{ row.male_count }}</td>
+                    <td class="text-center border p-1 col-gender">{{ row.female_count }}</td>
+                    <td class="text-center border p-1 col-total">{{ row.total_count }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <div class="page-break">
+            <h3 class="font-semibold">May Sakit: <span class="ml-4">{{ may_sakit_count }}</span> </h3> 
+        </div>
+        <table class="w-full border border-gray-400 mb-4 text-sm">
+            <thead>
+                <tr class="bg-gray-100">
+                    <th class="border p-1">Mga Sakit</th>
+                    <th class="border p-1 col-gender">Lalaki</th>
+                    <th class="border p-1 col-gender">Babae</th>
+                    <th class="border p-1 col-total">Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for sickness in sickness_counts %}
+                {% if sickness.total_count > 0 %}
+                <tr>
+                    <td class="text-center border p-1">{{ sickness.disease }}</td>
+                    <td class="text-center border p-1 col-gender">{{ sickness.male_count }}</td>
+                    <td class="text-center border p-1 col-gender">{{ sickness.female_count }}</td>
+                    <td class="text-center border p-1 col-total">{{ sickness.total_count }}</td>
+                </tr>
+                {% endif %}
+                {% endfor %}
+            </tbody>
+        </table>
+        <table class="w-full border border-gray-400 mb-4 text-sm">
+            <thead>
+                <tr class="bg-gray-100">
+                    <th class="border p-1">Iba pang Sakit</th>
+                    <th class="border p-1 col-gender">Lalaki</th>
+                    <th class="border p-1 col-gender">Babae</th>
+                    <th class="border p-1 col-total">Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for condition, counts in other_health_condition.items %}
+                <tr>
+                    <td class="text-center border p-1">{{ condition }}</td>
+                    <td class="text-center border p-1 col-gender">{{ counts.male_count }}</td>
+                    <td class="text-center border p-1 col-gender">{{ counts.female_count }}</td>
+                    <td class="text-center border p-1 col-total">{{ counts.total_count }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <script>
+        window.onload = function() {
+            window.print();
+        }
+    </script>
+</body>
+</html>

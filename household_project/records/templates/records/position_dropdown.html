@@ -1,0 +1,47 @@
+<select name="{{ name|default:'position[]' }}" id="{{ id|default:'position-input' }}" class="w-full p-2 border rounded" required>
+  <option value="">Select Position</option>
+  <optgroup label="Immediate Family Positions">
+    <option value="Head" {% if selected == 'Head' %}selected{% endif %}>Head</option>
+    <option value="Spouse" {% if selected == 'Spouse' %}selected{% endif %}>Spouse</option>
+    <option value="Live-in Partner" {% if selected == 'Live-in Partner' %}selected{% endif %}>Live-in Partner</option>
+    <option value="Father" {% if selected == 'Father' %}selected{% endif %}>Father</option>
+    <option value="Mother" {% if selected == 'Mother' %}selected{% endif %}>Mother</option>
+    <option value="Son" {% if selected == 'Son' %}selected{% endif %}>Son</option>
+    <option value="Daughter" {% if selected == 'Daughter' %}selected{% endif %}>Daughter</option> 
+  </optgroup>
+  <optgroup label="Extended Family Positions">
+    <option value="Grandfather" {% if selected == 'Grandfather' %}selected{% endif %}>Grandfather (Paternal or Maternal)</option>
+    <option value="Grandmother" {% if selected == 'Grandmother' %}selected{% endif %}>Grandmother (Paternal or Maternal)</option>
+    <option value="Grandson" {% if selected == 'Grandson' %}selected{% endif %}>Grandson</option>
+    <option value="Granddaughter" {% if selected == 'Granddaughter' %}selected{% endif %}>Granddaughter</option>
+    <option value="Brother" {% if selected == 'Brother' %}selected{% endif %}>Brother</option>
+    <option value="Sister" {% if selected == 'Sister' %}selected{% endif %}>Sister</option>
+    <option value="Uncle" {% if selected == 'Uncle' %}selected{% endif %}>Uncle</option>
+    <option value="Aunt" {% if selected == 'Aunt' %}selected{% endif %}>Aunt</option>
+    <option value="Nephew" {% if selected == 'Nephew' %}selected{% endif %}>Nephew</option>
+    <option value="Niece" {% if selected == 'Niece' %}selected{% endif %}>Niece</option>
+    <option value="Cousin" {% if selected == 'Cousin' %}selected{% endif %}>Cousin</option>
+  </optgroup>
+  <optgroup label="In-Laws">
+    <option value="Father-in-law" {% if selected == 'Father-in-law' %}selected{% endif %}>Father-in-law</option>
+    <option value="Mother-in-law" {% if selected == 'Mother-in-law' %}selected{% endif %}>Mother-in-law</option>
+    <option value="Son-in-law" {% if selected == 'Son-in-law' %}selected{% endif %}>Son-in-law</option>
+    <option value="Daughter-in-law" {% if selected == 'Daughter-in-law' %}selected{% endif %}>Daughter-in-law</option>
+    <option value="Brother-in-law" {% if selected == 'Brother-in-law' %}selected{% endif %}>Brother-in-law</option>
+    <option value="Sister-in-law" {% if selected == 'Sister-in-law' %}selected{% endif %}>Sister-in-law</option>
+  </optgroup>
+  <optgroup label="Other Household Roles">
+    <option value="Stepfather" {% if selected == 'Stepfather' %}selected{% endif %}>Stepfather</option>
+    <option value="Stepmother" {% if selected == 'Stepmother' %}selected{% endif %}>Stepmother</option>
+    <option value="Stepson" {% if selected == 'Stepson' %}selected{% endif %}>Stepson</option>
+    <option value="Stepdaughter" {% if selected == 'Stepdaughter' %}selected{% endif %}>Stepdaughter</option>
+    <option value="Adopted Son" {% if selected == 'Adopted Son' %}selected{% endif %}>Adopted Son</option>
+    <option value="Adopted Daughter" {% if selected == 'Adopted Daughter' %}selected{% endif %}>Adopted Daughter</option>
+    <option value="Guardian" {% if selected == 'Guardian' %}selected{% endif %}>Guardian</option>
+    <option value="House Helper / Yaya" {% if selected == 'House Helper / Yaya' %}selected{% endif %}>House Helper / Yaya</option>
+    <option value="Boarder" {% if selected == 'Boarder' %}selected{% endif %}>Boarder</option>
+    <option value="Roommate" {% if selected == 'Roommate' %}selected{% endif %}>Roommate</option>
+    <option value="Other Relative" {% if selected == 'Other Relative' %}selected{% endif %}>Other Relative</option>
+    <option value="Non-relative" {% if selected == 'Non-relative' %}selected{% endif %}>Non-relative</option>
+  </optgroup>
+</select>

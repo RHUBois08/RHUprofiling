@@ -1,0 +1,258 @@
+{% extends 'authentication/base.html' %}
+{% load static %}
+
+{% block top-nav %}
+<div class="flex justify-between items-center">
+    <h1 class="font-semibold text-2xl">Dashboard</h1> 
+    <div class="flex flex-row items-center gap-4">
+        <select id="year-selector" name="year" onchange="filterByYear(this.value)" class="rounded-lg border-none">
+            {% for year in year_range %}
+            <option value="{{ year }}" {% if year == selected_year %}selected{% endif %}>{{ year }}</option>
+            {% endfor %}
+        </select>
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+        <div class="flex justify-start mb-4 gap-4">
+            <form method="get" id="barangay-filter-form">
+                <input type="hidden" name="year" value="{{ selected_year }}"> <!-- Preserve the selected year -->
+                <select id="barangay" name="barangay" class="text-black py-2 px-6 rounded-md white:bg-teal-600 mr-6" onchange="document.getElementById('barangay-filter-form').submit()">
+                    <option value="">Barangay All</option>
+                    <option value="antipolo" {% if selected_barangay == "antipolo" %}selected{% endif %}>Antipolo</option>
+                    <option value="entablado" {% if selected_barangay == "entablado" %}selected{% endif %}>Entablado</option>
+                    <option value="laguan" {% if selected_barangay == "laguan" %}selected{% endif %}>Laguan</option>
+                    <option value="pauli-1" {% if selected_barangay == "pauli-1" %}selected{% endif %}>Pauli-1</option>
+                    <option value="pauli-2" {% if selected_barangay == "pauli-2" %}selected{% endif %}>Pauli-2</option>
+                    <option value="poblacion east" {% if selected_barangay == "poblacion east" %}selected{% endif %}>Poblacion East</option>
+                    <option value="poblacion west" {% if selected_barangay == "poblacion west" %}selected{% endif %}>Poblacion West</option>
+                    <option value="pook" {% if selected_barangay == "pook" %}selected{% endif %}>Pook</option>
+                    <option value="tala" {% if selected_barangay == "tala" %}selected{% endif %}>Tala</option>
+                    <option value="talaga" {% if selected_barangay == "talaga" %}selected{% endif %}>Talaga</option>
+                    <option value="tuy" {% if selected_barangay == "tuy" %}selected{% endif %}>Tuy</option>
+                </select>
+            </form>
+        </div>
+
+        <div class="grid grid-cols-3 gap-4 mb-4">
+            <!-- Pie Chart -->
+            <div class="chart-container col-span-2 bg-white rounded-lg shadow-md p-4">
+                <h2 class="text-2xl font-semibold mb-4 text-center">Age Classification</h2>
+                <div class="flex justify-center items-center">
+                    <canvas id="myPieChart" style="max-width: 500px; max-height: 300px;"></canvas> <!-- Adjusted size -->
+                </div>    
+            </div>
+            <!-- Population Statistics -->
+            <div class="bg-white rounded-lg shadow-md p-4">
+                <h2 class="text-2xl font-semibold mb-4 text-center">Population</h2>
+                <div class="grid grid-cols-2 gap-4 text-center">
+                        
+                        <div>
+                            <div class="flex items-center justify-center text-3xl text-gray-700">
+                                <i class="fas fa-home"></i>
+                            </div>
+                            <p class="text-sm">Houses</p>
+                            <p id="total-households" class="font-bold text-xl">{{ total_households }}</p>
+                        </div>
+                        <div>
+                            <div class="flex items-center justify-center text-3xl text-gray-700">
+                                <i class="fa-solid fa-house-user"></i>
+                            </div>
+                            <p class="text-sm">Households</p>
+                            <p id="total-families" class="font-bold text-xl">{{ total_families }}</p>
+                        </div>
+                        <div>
+                            <div class="flex items-center justify-center text-3xl text-blue-500">
+                                <i class="fas fa-male"></i>
+                            </div>
+                            <p class="text-sm">Male</p>
+                            <p id="total-male" class="font-bold text-xl">{{ total_male }}</p>
+                        </div>
+                        <div>
+                            <div class="flex items-center justify-center text-3xl text-pink-500">
+                                <i class="fas fa-female"></i>
+                            </div>
+                            <p class="text-sm">Female</p>
+                            <p id="total-female" class="font-bold text-xl">{{ total_female }}</p>
+                        </div>
+                        <div>
+                            <div class="flex items-center justify-center text-3xl text-gray-700">
+                                <i class="fas fa-users"></i>
+                            </div>
+                            <p class="text-sm">Total</p>
+                            <p id="total-population" class="font-bold text-xl">{{ total_population }}</p>
+                        </div>
+                </div>
+            </div>
+        </div>
+        <div class="bg-white rounded-lg shadow-md p-4 mt-8">
+            <!-- Add the images with links -->
+            <div class="flex justify-evenly gap-8">
+                
+                <a href="https://doh.gov.ph/" target="_blank" class="flex-1 flex justify-center">
+                    <div class="w-28 h-28 flex items-center justify-center rounded-lg overflow-hidden">
+                        <img src="{% static 'images/DOH_logo.png' %}" alt="DOH Logo" class="object-contain w-full h-full">
+                    </div>
+                </a>
+                <a href="https://www.philhealth.gov.ph/" target="_blank" class="flex-1 flex justify-center">
+                    <div class="w-28 h-28 flex items-center justify-center rounded-lg overflow-hidden">
+                        <img src="{% static 'images/PhilHealth_logo.png' %}" alt="PhilHealth Logo" class="object-contain w-full h-full">
+                    </div>
+                </a>
+                <a href="https://www.dilg.gov.ph/" target="_blank" class="flex-1 flex justify-center">
+                    <div class="w-40 h-40 flex items-center justify-center rounded-lg overflow-hidden">
+                        <img src="{% static 'images/DILG_logo.png' %}" alt="DILG Logo" class="object-contain w-full h-full">
+                    </div>
+                </a>
+            </div>
+        </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
+    
+    <script> 
+        document.addEventListener("DOMContentLoaded", function() {
+            // Parse age classifications data from the backend
+            const ageClassificationsData = JSON.parse('{{ age_classifications|escapejs }}');  // Use escapejs to escape special characters
+
+            // Define all age class labels (no parenthesis/range)
+            const allLabels = [
+                'Infants',
+                'Toddlers',
+                'Childhood',
+                'Teenagers',
+                'Adults',
+                'Middle Aged Adults',
+                'Seniors'
+            ];
+
+            // Map backend keys to new labels
+            const labelMap = {
+                'Infants': 'Infants',
+                'Toddlers': 'Toddlers',
+                'Childhood': 'Childhood',
+                'Teenagers': 'Teenagers',
+                'Adults': 'Adults',
+                'Middle Aged Adults': 'Middle Aged Adults',
+                'Seniors': 'Seniors'
+            };
+
+            // Age ranges for tooltips
+            const ageRanges = {
+                'Infants': '0 to less than 1',
+                'Toddlers': '1 to less than 5',
+                'Childhood': '5 to less than 13',
+                'Teenagers': '13 to less than 20',
+                'Adults': '20 to less than 40',
+                'Middle Aged Adults': '40 to less than 60',
+                'Seniors': '60 and above'
+            };
+
+            // Build dataValues array in the order of allLabels
+            const dataValues = allLabels.map(label => {
+                // Find the backend key for this label
+                const backendKey = Object.keys(labelMap).find(key => labelMap[key] === label);
+                return ageClassificationsData[backendKey] || 0;
+            });
+
+            // Filter out zero values for the chart
+            const filteredLabels = allLabels.filter((label, index) => dataValues[index] > 0);
+            const filteredDataValues = dataValues.filter(value => value > 0);
+
+            if (filteredDataValues.length === 0) {
+                // If no data is available, display "No Data Available" text
+                const chartContainer = document.querySelector('.chart-container');
+                chartContainer.innerHTML = `
+                    <h2 class="text-2xl font-semibold mb-4 text-center">Classification</h2>
+                    <div class="flex justify-center items-center">
+                    <p class="text-gray-500 text-xl mt-10">No Data Available</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const data = {
+                labels: filteredLabels,
+                datasets: [{
+                    data: filteredDataValues,
+                    backgroundColor: [
+                        'rgba(255, 99, 132, 0.8)',   // Infants (Pink/Red)
+                        'rgba(54, 162, 235, 0.8)',  // Toddlers (Light Blue)
+                        'rgba(255, 206, 86, 0.8)',  // Childhood (Yellow)
+                        'rgba(75, 192, 192, 0.8)',  // Teenagers (Teal/Cyan)
+                        'rgba(153, 102, 255, 0.8)', // Adults (Purple)
+                        'rgba(255, 159, 64, 0.8)',  // Middle Aged Adults (Orange)
+                        'rgba(50, 205, 50, 0.8)'      // Seniors (Lime Green)
+                    ],
+                    hoverOffset: 5
+                }]
+            };
+
+            const config = {
+                type: 'pie',
+                data: data,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'left',
+                            labels: {
+                                font: {
+                                    size: 18
+                                }
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(tooltipItem) {
+                                    let total = data.datasets[0].data.reduce((sum, value) => sum + value, 0);
+                                    let value = data.datasets[0].data[tooltipItem.dataIndex];
+                                    let percentage = ((value / total) * 100).toFixed(2) + '%';
+                                    let label = data.labels[tooltipItem.dataIndex];
+                                    let range = ageRanges[label] ? ` (${ageRanges[label]})` : '';
+                                    return `${label}${range}: ${value} (${percentage})`; // Show range on hover
+                                }
+                            }
+                        },
+                        datalabels: {
+                            formatter: (value, ctx) => {
+                                let total = ctx.chart.data.datasets[0].data.reduce((sum, val) => sum + val, 0);
+                                let percentage = ((value / total) * 100).toFixed(2) + '%';
+                                return `${value} (${percentage})`; // Display raw values and percentage
+                            },
+                            color: '#fff',
+                            font: {
+                                size: 14,
+                                weight: 'bold'
+                            }
+                        }
+                    }
+                },
+                plugins: [ChartDataLabels]
+            };
+
+            const ctx = document.getElementById('myPieChart').getContext('2d');
+            new Chart(ctx, config);
+        });
+
+        function filterBarangay() {
+            const input = document.getElementById('barangay-search').value.toLowerCase();
+            const options = document.querySelectorAll('#barangay option');
+            options.forEach(option => {
+                if (option.textContent.toLowerCase().includes(input)) {
+                    option.style.display = '';
+                } else {
+                    option.style.display = 'none';
+                }
+            });
+        }
+
+        function filterByYear(year) {
+            const url = new URL(window.location.href);
+            url.searchParams.set('year', year); // Add or update the year query parameter
+            window.location.href = url.toString(); // Reload the page with the updated URL
+        }
+    </script>
+{% endblock %}

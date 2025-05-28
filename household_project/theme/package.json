@@ -1,0 +1,8 @@
+{
+  "devDependencies": {
+    "tailwind-scrollbar": "^4.0.2"
+  },
+  "dependencies": {
+    "clean-css-cli": "^5.6.3"
+  }
+}

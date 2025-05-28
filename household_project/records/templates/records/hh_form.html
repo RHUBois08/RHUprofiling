@@ -1,0 +1,379 @@
+{% extends 'authentication/base.html' %}
+{% block top-nav %}
+    <div class="flex items-center gap-3">
+        <a class="text-2xl" href="{% url 'records:index' %}"><i class="fas fa-arrow-left"></i></a>
+        <h1 class="font-semibold text-2xl">House Form</h1>
+    </div>
+{% endblock %}
+{% block content %}
+    {% if message %}
+        <div id="success-message" class="bg-green-100 border rounded-lg border-green-500 text-green-700 px-4 py-3 relative" role="alert">
+            <p class="font-bold">Success</p>
+            <p class="text-sm">{{ message }}</p>
+            <button onclick="this.parentElement.style.display='none'" class="absolute top-0 right-0 mt-2 mr-2 text-green-700 hover:text-green-900">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    {% elif error %}
+        <div id="error-message" class="bg-red-100 border rounded-lg border-red-500 text-red-700 px-4 py-3 relative" role="alert">
+            <p class="font-bold">Error</p>
+            <p class="text-sm">{{ error }}</p>
+            {% if suggested_number %}
+                <input type="hidden" name="confirm_duplicate" value="true">
+                <input type="hidden" name="house_number" value="{{ suggested_number }}">
+            {% endif %}
+            <button onclick="this.parentElement.style.display='none'" class="absolute top-0 right-0 mt-2 mr-2 text-red-700 hover:text-red-900">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    {% endif %}
+    <!-- Form Section -->
+    <form method="post" action="{% url 'records:save_household' %}" onsubmit="return showPopup()">
+        {% csrf_token %}
+        <div class=" bg-white p-6 rounded-lg ">
+            <div class="grid grid-cols-3 gap-4">
+                <div>
+                    <label class="block font-medium">Barangay:</label>
+                    <select required id="barangay" name="barangay" class="w-full p-2 border rounded" onchange="updatePurok()">
+                        <option></option>
+                        <option value="ANTIPOLO">ANTIPOLO</option>                 
+                        <option value="ENTABLADO">ENTABLADO</option>
+                        <option value="LAGUAN">LAGUAN</option>
+                        <option value="PAULI-1">PAULI-1</option>
+                        <option value="PAULI-2">PAULI-2</option>
+                        <option value="POBLACION EAST">POBLACION EAST</option>
+                        <option value="POBLACION WEST">POBLACION WEST</option>
+                        <option value="POOK">POOK</option> 
+                        <option value="TALA">TALA</option>
+                        <option value="TALAGA">TALAGA</option>
+                        <option value="TUY">TUY</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block font-medium">Purok:</label>
+                    <select id="purok" name="purok" class="w-full p-2 border rounded" onchange="updateHouseholdNumber()">
+                        <option></option>
+                    </select>
+                </div>
+                <div>
+                    <label id="household-number" class="block font-medium">Numero ng Bahay:</label>
+                    <input type="text" id="householdNumber" name="house_number" class="w-full p-2 border rounded" oninput="limitHouseNumberDigits(this)">
+                </div>
+                <div>
+                    <label class="block font-medium">Respondent:</label>
+                    <input type="text" name="respondent" class="w-full p-2 border rounded">
+                </div>
+                <div class="flex flex-col">
+                    <label class="block font-medium">Number of Household:</label>
+                    <select name="no_of_family" id="noOfFamily" class="w-full p-2 border rounded" onchange="updateFamilyContainers()">
+                        <option value="" selected disabled>Select</option>
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                        <option value="5">5</option>
+                        <option value="6">6</option>
+                        <option value="7">7</option>
+                        <option value="8">8</option>
+                        <option value="9">9</option>
+                        <option value="10">10</option>
+                    </select>
+                </div>
+            </div>
+
+            <h2 class="text-xl font-semibold mt-6">Mga Pangalan na Nakatira sa Bahay</h2>
+
+            <!-- Dynamic Form Container -->
+            <div id="form-container">
+                <!-- Family containers will be dynamically added here -->
+            </div>
+
+            <!-- Add Button -->
+            {% comment %} <div class="col-span-6 flex justify-center items-center mt-5">
+                <button type="button" onclick="addEntry()" class="bg-teal-600 text-white px-6 py-2 rounded hover:bg-teal-700"><i class="fas fa-plus"></i> Add</button>
+            </div> {% endcomment %}
+            <div class="col-span-6 flex justify-center items-center mt-5">
+                <button type="submit" class="bg-white shadow-md text-teal-700 px-6 py-2 rounded-lg hover:bg-teal-600 hover:text-white">
+                    <i class="fas fa-save"></i> Save
+                </button>
+            </div>
+        </div>
+    </form>
+
+    <script>
+        const purokData = {
+            "ANTIPOLO": ["1A", "1B", "1C", "2A", "2B", "3", "4A", "4B", "5A", "5B", "5C", "5D", "5E", "6A", "6B", "6C", "7A", "7B"],
+            "ENTABLADO": ["1A", "1B"],
+            "LAGUAN": ["01", "02", "3A", "3B"],
+            "PAULI-1": ["01", "02", "3A", "3B", "4A", "4B"],
+            "PAULI-2": ["01", "02", "03", "4A", "4B", "05", "6A", "6B", "7"],
+            "POBLACION EAST": ["01", "2A", "2B", "03", "4A", "4B", "4C"],
+            "POBLACION WEST": ["1A", "1B","02","03","04","05","06","07"],
+            "POOK": ["1A", "1B", "02", "03", "04", "05", "06", "07", "08"],
+            "TALA": ["1A", "1B", "1C", "03", "04", "5A", "5B", "5C", "6A", "6B", "6C", "7A", "7B", "7C", "8A", "8B"],
+            "TALAGA": ["1A", "1B", "1C", "2A", "2B", "2C", "3A", "3B", "3C", "4A", "4B", "4C", "5A", "5B", "6A", "6B"],
+            "TUY": ["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11"],
+            
+        };
+
+        const barangayCode = {
+            "ANTIPOLO": "01",
+            "POBLACION EAST": "02",
+            "ENTABLADO": "03",
+            "LAGUAN": "04",
+            "PAULI-1": "05",
+            "PAULI-2": "06",
+            "POOK": "07",
+            "TALA": "08",
+            "TALAGA": "09",
+            "TUY": "10",
+            "POBLACION WEST": "11"
+        };
+
+        function updatePurok() {
+            const barangaySelect = document.getElementById("barangay");
+            const purokSelect = document.getElementById("purok");
+            const selectedBarangay = barangaySelect.value;
+
+            // Clear previous options
+            purokSelect.innerHTML = '<option>Select</option>';
+
+            if (selectedBarangay in purokData) {
+                purokData[selectedBarangay].forEach(purok => {
+                    const option = document.createElement("option");
+                    option.value = purok;
+                    option.textContent = purok;
+                    purokSelect.appendChild(option);
+                });
+            }
+        }
+
+        function updateHouseholdNumber() {
+            const barangaySelect = document.getElementById("barangay");
+            const purokSelect = document.getElementById("purok");
+            const householdNumberInput = document.getElementById("householdNumber");
+
+            const selectedBarangay = barangaySelect.value;
+            const selectedPurok = purokSelect.value;
+
+            if (selectedBarangay && selectedPurok && selectedBarangay in barangayCode) {
+                const barangayCodeValue = barangayCode[selectedBarangay];
+                const currentYear = new Date().getFullYear();
+                householdNumberInput.value = `${currentYear}-${barangayCodeValue}-${selectedPurok}-00000`;
+            } else {
+                householdNumberInput.value = '';
+            }
+        }
+
+        function addEntry() {
+            // Get the form container
+            const container = document.getElementById("form-container");
+
+            // Create a new entry using template literals
+            const newEntry = document.createElement("div");
+            newEntry.className = "grid grid-cols-6 gap-6 mt-5 relative";
+            newEntry.innerHTML = `
+                <div class="col-span-1">
+                    <label class="block font-medium">Last Name:</label>
+                    <input required type="text" name="last_name[]" class="w-full p-2 border rounded" style="text-transform: capitalize;">
+                </div>
+                <div class="col-span-1">
+                    <label class="block font-medium">First Name:</label>
+                    <input required type="text" name="first_name[]" class="w-full p-2 border rounded" style="text-transform: capitalize;">
+                </div>
+                <div class="col-span-1">
+                    <label class="block font-medium">Middle Name:</label>
+                    <input required type="text" name="middle_name[]" class="w-full p-2 border rounded" style="text-transform: capitalize;">
+                </div>
+                <div class="col-span-1">
+                    <label class="block font-medium">Suffix:</label>
+                    <select name="suffix[]" class="w-full p-2 border rounded">
+                        <option>N/A</option>
+                        <option>Jr.</option>
+                        <option>Sr.</option>
+                        <option>III</option>
+                        <option>IV</option>
+                        <option>V</option>
+                    </select>
+                </div>
+                <div class="col-span-1">
+                        <label class="block font-medium">Sex:</label>
+                        <select name="sex[]" class="w-full p-2 border rounded">
+                            <option>Male</option>
+                            <option>Female</option>
+                        </select>
+                    </div>
+                <div class="col-span-1">
+                    <label class="block font-medium">Posisyon sa Pamilya:</label>
+                    {% include 'records/position_dropdown.html' with name="position[]" %}
+                </div>
+                <input type="hidden" name="person_id[]" value="">
+                <button type="button" class="absolute top-0 right-0 text-red-500" onclick="removeEntry(this)"><i class="fas fa-times "></i></button>
+            `;
+
+            // Append the new entry to the container
+            container.appendChild(newEntry);
+        }
+
+        function removeEntry(button) {
+            // Remove the entry
+            button.parentElement.remove();
+        }
+
+        function showPopup() {
+            alert("Data is saving..");
+            return true;
+        }
+
+        function updateFamilyContainers() {
+            const noOfFamily = document.getElementById("noOfFamily").value;
+            const formContainer = document.getElementById("form-container");
+
+            formContainer.innerHTML = "";
+
+            for (let i = 1; i <= noOfFamily; i++) {
+                const familyContainer = document.createElement("div");
+                familyContainer.className = "family-container mt-6 p-4 border border-gray-300 rounded-lg";
+                familyContainer.innerHTML = `
+                    <div class="flex justify-between mt-4">
+                        <h3 class="text-lg font-semibold">Household ${i}</h3>
+                        <button type="button" onclick="addMember(this, ${i})" class="bg-teal-600 text-white px-4 py-2 rounded hover:bg-teal-700">
+                            <i class="fas fa-plus"></i> Add Member
+                        </button>
+                    </div>
+                    <div class="grid grid-cols-6 gap-6 mt-5">
+                        <div class="col-span-1">
+                            <label class="block font-medium">Last Name:</label>
+                            <input required type="text" name="last_name_family_${i}[]" class="w-full p-2 border rounded" style="text-transform: capitalize;">
+                        </div>
+                        <div class="col-span-1">
+                            <label class="block font-medium">First Name:</label>
+                            <input required type="text" name="first_name_family_${i}[]" class="w-full p-2 border rounded" style="text-transform: capitalize;">
+                        </div>
+                        <div class="col-span-1">
+                            <label class="block font-medium">Middle Name:</label>
+                            <input required type="text" name="middle_name_family_${i}[]" class="w-full p-2 border rounded" style="text-transform: capitalize;">
+                        </div>
+                        <div class="col-span-1">
+                            <label class="block font-medium">Suffix:</label>
+                            <select name="suffix_family_${i}[]" class="w-full p-2 border rounded">
+                                <option>N/A</option>
+                                <option>Jr.</option>
+                                <option>Sr.</option>
+                                <option>III</option>
+                                <option>IV</option>
+                                <option>V</option>
+                            </select>
+                        </div>
+                        <div class="col-span-1">
+                            <label class="block font-medium">Sex:</label>
+                            <select name="sex_family_${i}[]" class="w-full p-2 border rounded">
+                                <option>Male</option>
+                                <option>Female</option>
+                            </select>
+                        </div>
+                        <div class="col-span-1">
+                            <label class="block font-medium">Position:</label>
+                            {% include 'records/position_dropdown.html' with name="position_family_${i}[]" %}
+                        </div>
+                    </div>
+                `;
+                formContainer.appendChild(familyContainer);
+            }
+        }
+
+        function addMember(button, familyIndex) {
+            const familyContainer = button.parentElement.parentElement; // Target the correct family container
+            const newMember = document.createElement("div");
+            newMember.className = "grid grid-cols-6 gap-6 mt-5 relative border-t pt-4"; // Add border and spacing for better organization
+            newMember.innerHTML = `
+                <div class="col-span-1">
+                    <label class="block font-medium">Last Name:</label>
+                    <input required type="text" name="last_name_family_${familyIndex}[]" class="w-full p-2 border rounded" style="text-transform: capitalize;">
+                </div>
+                <div class="col-span-1">
+                    <label class="block font-medium">First Name:</label>
+                    <input required type="text" name="first_name_family_${familyIndex}[]" class="w-full p-2 border rounded" style="text-transform: capitalize;">
+                </div>
+                <div class="col-span-1">
+                    <label class="block font-medium">Middle Name:</label>
+                    <input required type="text" name="middle_name_family_${familyIndex}[]" class="w-full p-2 border rounded" style="text-transform: capitalize;">
+                </div>
+                <div class="col-span-1">
+                    <label class="block font-medium">Suffix:</label>
+                    <select name="suffix_family_${familyIndex}[]" class="w-full p-2 border rounded">
+                        <option>N/A</option>
+                        <option>Jr.</option>
+                        <option>Sr.</option>
+                        <option>III</option>
+                        <option>IV</option>
+                        <option>V</option>
+                    </select>
+                </div>
+                <div class="col-span-1">
+                    <label class="block font-medium">Sex:</label>
+                    <select name="sex_family_${familyIndex}[]" class="w-full p-2 border rounded">
+                        <option>Male</option>
+                        <option>Female</option>
+                    </select>
+                </div>
+                <div class="col-span-1">
+                    <label class="block font-medium">Position:</label>
+                    {% include 'records/position_dropdown.html' with name="position_family_${familyIndex}[]" %}
+                </div>
+                <button type="button" class="absolute top-0 right-0 text-red-500" onclick="removeEntry(this)">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+            familyContainer.appendChild(newMember);
+        }
+
+        function removeEntry(button) {
+            // Remove the entry
+            button.parentElement.remove();
+        }
+
+        function validateForm() {
+            // You can add other validation logic here if needed
+            return true;
+        }
+
+        document.querySelector("form").addEventListener("submit", function (event) {
+            if (!validateForm()) {
+                event.preventDefault();
+            }
+        });
+
+        // Automatically hide success or error messages after 3 seconds
+        setTimeout(() => {
+            const successMessage = document.getElementById('success-message');
+            const errorMessage = document.getElementById('error-message');
+            if (successMessage) {
+            successMessage.style.transition = 'opacity 0.5s ease-out';
+            successMessage.style.opacity = '0';
+            setTimeout(() => successMessage.style.display = 'none', 500);
+            }
+            if (errorMessage) {
+            errorMessage.style.transition = 'opacity 0.5s ease-out';
+            errorMessage.style.opacity = '0';
+            setTimeout(() => errorMessage.style.display = 'none', 500);
+            }
+        }, 2000);
+
+        function limitHouseNumberDigits(input) {
+            // Allow editing only the last 5 characters (letters or digits)
+            let value = input.value;
+            // Match the pattern: YYYY-XX-XX-XXXXX (last 5 can be letters/numbers)
+            let match = value.match(/^(\d{4}-\d{2}-[A-Za-z0-9]+-)([A-Za-z0-9]*)$/);
+            if (match) {
+            // Only keep up to 5 alphanumeric characters in the last segment
+            let chars = match[2].replace(/[^A-Za-z0-9]/g, '').slice(0, 5);
+            input.value = match[1] + chars;
+            } else {
+            // If pattern doesn't match, reset to empty or keep only valid part
+            let valid = value.match(/^(\d{4}-\d{2}-[A-Za-z0-9]+-)/);
+            input.value = valid ? valid[1] : '';
+            }
+        }
+    </script>
+{% endblock %}
